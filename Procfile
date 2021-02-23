@@ -1,1 +1,1 @@
-web: gunicorn herokututor:app
+web: python main.py
