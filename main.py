@@ -32,7 +32,7 @@ def ytv():
 			dl_link = bs(post('https://www.y2mate.com/mates/en60/convert',data={'type':url.split('/')[2],'_id':id[0],'v_id':url.split('/')[3],'ajax':'1','token':'','ftype':'mp4','fquality':'360p'}).json()['result'],'html.parser').find('a')['href']
 			return {
 				'status': 200,
-				'restapi' : 'ferdiz-afk',
+				'restapi' : 'jenralsvg',
 				'title': title,
 				'thumb': thumb,
 				'result': dl_link,
@@ -66,7 +66,7 @@ def yta():
 			dl_link = bs(post('https://www.y2mate.com/mates/en60/convert',data={'type':url.split('/')[2],'_id':id[0],'v_id':url.split('/')[3],'ajax':'1','token':'','ftype':'mp3','fquality':'128'}).json()['result'],'html.parser').find('a')['href']
 			return {
 				'status': 200,
-				'restapi' : 'ferdiz-afk',
+				'restapi' : 'jenralsvg',
 				'scrap' :  'youtube',
 				'title': title,
 				'thumb': thumb,
@@ -95,7 +95,7 @@ def waifu():
 	if result['gender'] == 'female':
 		return {
 			'status': 200,
-			'restapi' : 'ferdiz-afk',
+			'restapi' : 'jenralsvg',
 			'name': result['name'],
 			'desc': desc,
 			'image': result['image'],
