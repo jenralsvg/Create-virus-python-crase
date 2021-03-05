@@ -49,9 +49,8 @@ def layer():
 			huhu = layer(hehe, 'black')
 			os.system('base64 result.jpg > pow.jpg')
 			return {
-			    'restapi' :  'ferdiz-afk',
-				'status'  : 200,
-				'result'  : '`data:image/jpg;base64,%s`' % open('pow.jpg').read()
+				'status': 200,
+				'result': '`data:image/jpg;base64,%s`' % open('pow.jpg').read()
 			}
 		except Exception as e:
 			print(e)
@@ -65,7 +64,6 @@ def layer():
 			'status': False,
 			'msg': '[!] Masukkan parameter base64image'
 		}
-
 
 @app.route('/api/spamgmail', methods=['GET','POST'])
 def spamgimel():
@@ -113,34 +111,165 @@ def spamgimel():
             'msg': 'Masukkan parameter target'
         }
 
-@app.route('/api/halah', methods=['GET','POST'])
-def halah():
-	if request.args.get('text'):
-		text = str(request.args.get('text'))
-		kantal = text.replace('a', 'a').replace('A', 'A').replace('u', 'a').replace('U', 'A').replace('e', 'a').replace('E', 'A').replace('o', 'a').replace('O', 'A')
-		return { 'status': 200, 'result': kantal }
+@app.route('/api/spamcall', methods=['GET','POST'])
+def spamcall():
+    if request.args.get('no'):
+        no = request.args.get('no')
+        if str(no).startswith('8'):
+            hasil = ''
+            kyaa = post('https://id.jagreward.com/member/verify-mobile/%s' % no).json()
+            print(kyaa['message'])
+            if 'Anda akan menerima' in kyaa['message']:
+                hasil += '[!] Berhasil mengirim spam call ke nomor : 62%s' % no
+            else:
+                hasil += '[!] Gagal mengirim spam call ke nomor : 62%s' % no
+            return {
+                'status': 200,
+                'logs': hasil
+            }
+        else:
+            return {
+                'status': False,
+                'msg': '[!] Tolong masukkan nomor dengan awalan 8'
+            }
+    else:
+        return {
+            'status': False,
+            'msg': '[!] Masukkan parameter no' 
+        }
+@app.route('/api/spamsms', methods=['GET','POST'])
+def spamming():
+    if request.args.get('no'):
+        if request.args.get('jum'):
+            no = request.args.get('no')
+            jum = int(request.args.get('jum'))
+            if jum > 20: return {
+                'status': 200,
+                'msg': '[!] Max 20 ganteng'
+            }
+            url = 'https://www.lpoint.co.id/app/member/ESYMBRJOTPSEND.do'
+            head = {'UserAgent': 'Mozilla/5.0 (Linux; Android 8.1.0; CPH1853) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Mobile Safari/537.36'}
+            data = {'pn': '',
+                'bird': '',
+                'webMbrId': '',
+                'webPwd': '',
+                'maFemDvC': '',
+                'cellNo': no,
+                'otpNo': '',
+                'seq': '',
+                'otpChk': 'N',
+                'count': ''
+            }
+            hasil = ''
+            for i in range(jum):
+                kyaa = post(url, headers=head, data=data).text
+                if 'error' in kyaa:
+                    hasil += '[!] Gagal\n'
+                else:
+                    hasil += '[!] Sukses\n'
+            return {
+                'status': 200,
+                'logs': hasil
+            }
+        else:
+            return {
+                'status': False,
+                'msg': '[!] Masukkin parameter jum juga ganteng'
+            }
+    else:
+        return {
+            'status': False,
+            'msg': '[!] Masukkan parameter no'
+        }
+
+@app.route('/nulis', methods=['GET','POST'])
+def noolees():
+    if request.args.get('text'):
+        try:
+            nulis = tulis(unquote(request.args.get('text')))
+            for i in nulis:
+                i.save('resolt.jpg')
+            return {
+                'status': 200,
+                'result': imageToBase64('resolt.jpg')
+            }
+        except:
+            return {
+                'status': False,
+                'error': 'Failed writing dude:('
+            }
+    else:
+        return {
+            'status': False,
+            'msg': '[!] Masukkan parameter text'
+        }
+@app.route('/api/wiki', methods=['GET','POST'])
+def wikipedia():
+	if request.args.get('q'):
+		try:
+			kya = request.args.get('q')
+			cih = f'https://id.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro&explaintext&redirects=1&titles={kya}'
+			heuh = get(cih).json()
+			heuh_ = heuh['query']['pages']
+			hueh = re.findall(r'(\d+)', str(heuh_))
+			result = heuh_[hueh[0]]['extract']
+			return {
+				'status': 200,
+				'result': result
+			}
+		except Exception as e:
+			print(e)
+			return {
+				'status': False,
+				'error': '[❗] Yang anda cari tidak bisa saya temukan di wikipedia!'
+			}
 	else:
-		return { 'status': False, 'pesan': 'Masukkan parameter text'}
-		
-		
-@app.route('/api/hilih', methods=['GET','POST'])
-def hilih():
+		return {
+			'status': False,
+			'msg': '[!] Masukkan param q'
+		}
+
+@app.route('/api/tts', methods=['GET','POST'])
+def tts():
 	if request.args.get('text'):
-		text = str(request.args.get('text'))
-		kintil = text.replace('a', 'i').replace('A', 'I').replace('u', 'i').replace('U', 'I').replace('e', 'i').replace('E', 'I').replace('o', 'i').replace('O', 'I')
-		return { 'status': 200, 'result': kintil }
+		try:
+			teks = request.args.get('text')
+			print(teks)
+			if int(len(teks)) - int(len(teks.split(' '))) == 250:
+				return {
+					'status': 200,
+					'msg': '[❗] Maaf teks terlalu panjang!!',
+				}
+			else:
+				url = f'https://rest.farzain.com/api/tts.php?id={teks}&apikey='
+				if os.path.isfile('./tts/tts.mp3') == True:
+					os.remove('./tts/tts.mp3')
+					Tts = get(f'{url}{apiKey}').content
+					open('tts/tts.mp3','wb').write(Tts)
+					return {
+						'status': 200,
+						'msg': 'Success convert text to speech!',
+						'file': 'https://mhankbarbar/tts/tts.mp3'
+					}
+				else:
+					Tts = get(f'{url}{apiKey}').content
+					open('tts/tts.mp3','wb').write(Tts)
+					return {
+						'status': 200,
+						'msg': 'Success convert text to speech!',
+						'file': 'https://mhankbarbar.herokuapp.com/tts/tts.mp3'
+					}
+		except Exception as e:
+			print(e)
+			return {
+				'status': False,
+				'msg': '[!] Upss, terjadi kesalahan'
+			}
 	else:
-		return { 'status': False, 'pesan': 'Masukkan parameter text'}
-		
-		
-@app.route('/api/huluh', methods=['GET','POST'])
-def huluh():
-	if request.args.get('text'):
-		text = str(request.args.get('text'))
-		kuntul = text.replace('a', 'u').replace('A', 'U').replace('u', 'u').replace('U', 'U').replace('e', 'u').replace('E', 'U').replace('o', 'u').replace('O', 'U')
-		return { 'status': 200, 'result': kuntul }
-	else:
-		return { 'status': False, 'pesan': 'Masukkan parameter text'}
+		return {
+			'status': 200,
+			'msg': '[!] Masukkan parameter text'
+		}
 
 @app.route('/api/ytv', methods=['GET','POST'])
 def ytv():
@@ -156,7 +285,6 @@ def ytv():
 			dl_link = bs(post('https://www.y2mate.com/mates/en60/convert',data={'type':url.split('/')[2],'_id':id[0],'v_id':url.split('/')[3],'ajax':'1','token':'','ftype':'mp4','fquality':'360p'}).json()['result'],'html.parser').find('a')['href']
 			return {
 				'status': 200,
-				'restapi' : 'ferdiz-afk',
 				'title': title,
 				'thumb': thumb,
 				'result': dl_link,
@@ -190,8 +318,6 @@ def yta():
 			dl_link = bs(post('https://www.y2mate.com/mates/en60/convert',data={'type':url.split('/')[2],'_id':id[0],'v_id':url.split('/')[3],'ajax':'1','token':'','ftype':'mp3','fquality':'128'}).json()['result'],'html.parser').find('a')['href']
 			return {
 				'status': 200,
-				'restapi' : 'ferdiz-afk',
-				'scrap' :  'youtube',
 				'title': title,
 				'thumb': thumb,
 				'filesize': filesize,
@@ -210,7 +336,29 @@ def yta():
 			'msg': '[!] Masukkan parameter url'
 		}
 
-
+@app.route('/api/chord', methods=['GET','POST'])
+def chord():
+	if request.args.get('q'):
+		try:
+			q = request.args.get('q').replace(' ','+')
+			id = get('http://app.chordindonesia.com/?json=get_search_results&exclude=date,modified,attachments,comment_count,comment_status,thumbnail,thumbnail_images,author,excerpt,content,categories,tags,comments,custom_fields&search=%s' % q).json()['posts'][0]['id']
+			chord = get('http://app.chordindonesia.com/?json=get_post&id=%s' % id).json()
+			result = html_text.parse_html(chord['post']['content']).text_content()
+			return {
+				'status': 200,
+				'result': result
+			}
+		except Exception as e:
+			print(e)
+			return {
+				'status': False,
+				'error': '[❗] Maaf chord yang anda cari tidak dapat saya temukan!'
+			}
+	else:
+		return {
+			'status': False,
+			'msg': '[!] Masukkan parameter q'
+		}
 
 @app.route('/api/dewabatch', methods=['GET','POST'])
 def dewabatch():
@@ -342,8 +490,178 @@ def brainly_scraper():
 			'status': False,
 			'msg': '[!] Masukkan parameter q'
 		}
-	
 
+@app.route('/api/nekonime', methods=['GET','POST'])
+def nekonimek():
+	try:
+		neko = get('https://waifu.pics/api/sfw/neko').json()
+		nimek = neko['url']
+		return {
+			'status': 200,
+			'result': nimek
+		}
+	except:
+		neko = get('https://waifu.pics/api/sfw/neko').json()
+		nimek = neko['url']
+		return {
+			'status': 200,
+			'result': nimek
+		}
+
+@app.route('/api/randomloli', methods=['GET','POST'])
+def randomloli():
+	try:
+		hehe = ['kawaii','neko']
+		loli = get('https://api.lolis.life/%s' % random.choice(hehe)).json()['url']
+		return {
+			'status': 200,
+			'result': loli
+		}
+	except:
+		return {
+			'status': 200,
+			'result': loli
+		}
+@app.route('/api/ig', methods=['GET','POST'])
+def igeh():
+	if request.args.get('url'):
+		try:
+			url = request.args.get('url')
+			data = {'id': url}
+			result = get('https://www.villahollanda.com/api.php?url=' + url).json()
+			if result['descriptionc'] == None:
+				return {
+					'status': False,
+					'result': 'https://c4.wallpaperflare.com/wallpaper/976/117/318/anime-girls-404-not-found-glowing-eyes-girls-frontline-wallpaper-preview.jpg',
+				}
+			else:
+				return {
+					'status': 200,
+					'result': result['descriptionc'],
+				}
+		except Exception as e:
+			print(e)
+			return {
+				'status': False,
+				'result': 'https://c4.wallpaperflare.com/wallpaper/976/117/318/anime-girls-404-not-found-glowing-eyes-girls-frontline-wallpaper-preview.jpg',
+				'error': True
+			}
+	else:
+		return {
+			'status': False,
+			'msg': '[!] Masukkan parameter url'
+		}
+
+@app.route('/api/cuaca', methods=['GET','POST'])
+def cuaca():
+	if request.args.get('q'):
+		try:
+			q = request.args.get('q')
+			print(q)
+			url = f'https://rest.farzain.com/api/cuaca.php?id={q}&apikey='
+			weather = get(f'{url}{apiKey}').json()
+			print(weather)
+			if weather['respon']['deskripsi'] == 'null' or weather['respon']['deskripsi'] == None:
+				return {
+					'status': 404,
+					'error': '[❗] Gagal mengambil informasi cuaca, mungkin tempat tidak terdaftar/salah!'
+				}
+			else:
+				return {
+					'status': 200,
+					'result': {
+						'tempat': weather['respon']['tempat'],
+						'cuaca': weather['respon']['cuaca'],
+						'desk': weather['respon']['deskripsi'],
+						'suhu': weather['respon']['suhu'],
+						'kelembapan': weather['respon']['kelembapan'],
+						'udara': weather['respon']['udara'],
+						'angin': weather['respon']['angin']
+					},
+					'creator': 'Mhank BarBar'
+				}
+		except Exception as e:
+			print('Error : %s' % e)
+			return {
+				'status': False,
+				'msg': '[❗] Gagal mengambil informasi cuaca, mungkin tempat tidak terdaftar/salah!'
+			}
+	else:
+		return {
+			'status': False,
+			'msg': '[!] Masukkan parameter q'
+		}
+
+@app.route('/api/stalk', methods=['GET','POST'])
+def stalk():
+	if request.args.get('username'):
+		try:
+			username = request.args.get('username').replace('@','')
+			igestalk = bs(get('https://www.mystalk.net/profile/%s' % username, headers={'User-Agent':'Mozilla/5.0 (Linux; Android 8.1.0; CPH1909) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.101 Mobile Safari/537.36'}).text, 'html.parser').find('div', class_='user-profile-area')
+			igestalk_ = igestalk.findAll('span')
+			thumb = igestalk.find('img')['src']
+			return {
+				'status': 200,
+				'Name': igestalk_[0].text.strip(),
+				'Username': igestalk_[1].text.strip(),
+				'Jumlah_Post': igestalk_[2].text.replace('\n',' ').strip(),
+				'Jumlah_Followers': igestalk_[3].text.replace('\n',' ').strip(),
+				'Jumlah_Following': igestalk_[4].text.replace('\n',' ').strip(),
+				'Biodata': igestalk.find('p').text.strip(),
+				'Profile_pic': thumb
+			}
+		except Exception as e:
+			print(e)
+			return {
+				'status': False,
+				'error': '[❗] Username salah!!'
+			}
+	else:
+		return {
+			'status': False,
+			'msg': '[!] Masukkan parameter username'
+		}
+
+@app.route('/daerah', methods=['GET','POST'])
+def daerah():
+	daerah = 'Andreas, Ambon, Amlapura, Alford, Argamakmur, Atambua, Babo, Bagan Siapiapi, Central Kalimantan, Birmingham, Samosir, Balikpapan, Banda Aceh, Bandar Lampung, Bandung, Bangkalan, Cianjur, Bangko, Bangli, Banjar, Banjar Baru, Banjarmasin, Corn, BANTAENG , Banten, Bantul, Banyuwangi, Barabai, Barito, Barru, Batam, Batang, Batu, Baturaja, Batusangkar, Baubau, Bekasi, Bengkalis, Bengkulu, Benteng, Biak, Bima, Binjai, Bireuen, Bitung, Blitar, Blora, Bogor, Bojonegoro , Bondowoso, Bontang, Boyolali, Brebes, Bukit Tinggi, Maluku, Bulukumba, Buntok, Cepu, Ciamis, Cianjur, Cibinong, Cilacap, Cilegon, Cimahi, Cirebon, Curup, Demak, Denpasar, Depok, Dili, Dompu, Donggala, Dumai, Ende, Enggano, Enrekang, Fakfak, Garut, Gianyar, Gombong, Gorontalo, Gresik, Gunung Sitoli, Indramayu, Jakarta Barat, Jakarta Pusat, Jakarta Selatan, Jakarta Timur, Jakarta Utara, Jambi,Jayapura, Jember, Jeneponto, Jepara, Jombang, Kabanjahe, Kalabahi, Kalianda, Kandangan, Karanganyar, Karawang, Kasungan, Kayuagung, Kebumen, Kediri, Kefamenanu, Kendal, Kendari, Kertosono, Ketapang, Kisaran, Klaten, Kolaka, Kota Baru Pulau Laut , Bumi Bumi, Kota Jantho, Kotamobagu, Kuala Kapuas, Kuala Kurun, Kuala Pembuang, Kuala Tungkal, Kudus, Kuningan, Kupang, Kutacane, Kutoarjo, Labuhan, Lahat, Lamongan, Langsa, Larantuka, Lawang, Lhoseumawe, Limboto, Lubuk Basung, Lubuk Linggau, Lubuk Pakam, Lubuk Sikaping, Lumajang, Luwuk, Madiun, Magelang, Magetan, Majalengka, Majene, Makale, Makassar, Malang, Mamuju, Manna, Manokwari, Marabahan, Maros, Martapura Kalsel, Sulsel, Masohi, Mataram, Maumere, Medan, Mempawah, Menado, Mentok, Merauke, Metro, Meulaboh, Mojokerto, Muara Bulian, Muara Bungo, Muara Enim, Muara Teweh, Muaro Sijunjung, Muntilan, Nabire,Negara, Nganjuk, Ngawi, Nunukan, Pacitan, Padang, Padang Panjang, Padang Sidempuan, Pagaralam, Painan, Palangkaraya, Palembang, Palopo, Palu, Pamekasan, Pandeglang, Pangka_, Pangkajene Sidenreng, Pangkalan Bun, Pangkalpinang, Panyabungan, Par_, Parepare, Pariaman, Pasuruan, Pati, Payakumbuh, Pekalongan, Pekan Baru, Pemalang, Pematangsiantar, Pendopo, Pinrang, Pleihari, Polewali, Pondok Gede, Ponorogo, Pontianak, Poso, Prabumulih, Praya, Probolinggo, Purbalingga, Purukcahu, Purwakarta, Purwodadigrobogan, Purwarta Purworejo, Putussibau, Raha, Rangkasbitung, Rantau, Rantauprapat, Rantepao, Rembang, Rengat, Ruteng, Sabang, Salatiga, Samarinda, Kalbar, Sampang, Sampit, Sanggau, Sawahlunto, Sekayu, Selong, Semarang, Sengkang, Serang, Serui, Sibolga, Sidikalang, Sidoarjo, Sigli, Singaparna, Singaraja, Singkawang, Sinjai, Sintang, Situbondo, Slawi,Sleman, Soasiu, Soe, Solo, Solok, Soreang, Sorong, Sragen, Stabat, Subang, Sukabumi, Sukoharjo, Sumbawa Besar, Sumedang, Sumenep, Sungai Liat, Sungai Penuh, Sungguminasa, Surabaya, Surakarta, Tabanan, Tahuna, Takalar, Takengon , Tamiang Layang, Tanah Grogot, Tangerang, Tanjung Balai, Tanjung Enim, Tanjung Pandan, Tanjung Pinang, Tanjung Redep, Tanjung Selor, Tapak Tuan, Tarakan, Tarutung, Tasikmalaya, Tebing Tinggi, Tegal, Temanggung, Tembilahan, Tenggarong, Ternate, Tolitoli , Tondano, Trenggalek, Tual, Tuban, Tulung Agung, Ujung Berung, Ungaran, Waikabubak, Waingapu, Wamena, Watampone, Watansoppeng, Wates, Wonogiri, Wonosari, Wonosobo, YogyakartaTakalar, Takengon, Tamiang Layang, Tanah Grogot, Tangerang, Tanjung Balai, Tanjung Enim, Tanjung Pandan, Tanjung Pinang, Tanjung Redep, Tanjung Selor, Tapak Tuan, Tarakan, Tarutung, Tasikmalaya, Tebing Tinggi, Tegal, Temanggung, Tembilahan, Tenggarong, Ternate, Tolitoli, Tondano, Trenggalek, Tual, Tuban, Tulung Agung, Ujung Berung, Ungaran, Waikabubak, Waingapu, Wamena, Watampone, Watansoppeng, Wates, Wonogiri, Wonosari, Wonosobo, YogyakartaTakalar, Takengon, Tamiang Layang, Tanah Grogot, Tangerang, Tanjung Balai, Tanjung Enim, Tanjung Pandan, Tanjung Pinang, Tanjung Redep, Tanjung Selor, Tapak Tuan, Tarakan, Tarutung, Tasikmalaya, Tebing Tinggi, Tegal, Temanggung, Tembilahan, Tenggarong, Ternate, Tolitoli, Tondano, Trenggalek, Tual, Tuban, Tulung Agung, Ujung Berung, Ungaran, Waikabubak, Waingapu, Wamena, Watampone, Watansoppeng, Wates, Wonogiri, Wonosari, Wonosobo, YogyakartaWonogiri, Wonosari, Wonosobo, YogyakartaWonogiri, Wonosari, Wonosobo, Yogyakarta'
+	no = 1
+	hasil = ''
+	for i in daerah.split(','):
+		hasil += '%s. %s\n' % (no, i)
+		no += 1
+	return {
+		'status': 200,
+		'result': hasil
+	}
+
+@app.route('/api/jadwalshalat', methods=['GET','POST'])
+def jadwalshalat():
+	if request.args.get('daerah'):
+		try:
+			daer = request.args.get('daerah')
+			daerah = 'Ambarawa, Ambon, Amlapura, Amuntai, Argamakmur, Atambua, Babo, Bagan Siapiapi, Kalteng, Bajawa, Balige, Balikpapan, Banda Aceh, Bandarlampung, Bandung, Bangkalan, Bangkinang, Bangko, Bangli, Banjar, Banjar Baru, Banjarmasin, Banjarnegara, Bantaeng, Banten, Bantul, Banyuwangi, Barabai, Barito, Barru, Batam, Batang, Batu, Baturaja, Batusangkar, Baubau, Bekasi, Bengkalis, Bengkulu, Benteng, Biak, Bima, Binjai, Bireuen, Bitung, Blitar, Blora, Bogor, Bojonegoro, Bondowoso, Bontang, Boyolali, Brebes, Bukit Tinggi, Maluku, Bulukumba, Buntok, Cepu, Ciamis, Cianjur, Cibinong, Cilacap, Cilegon, Cimahi, Cirebon, Curup, Demak, Denpasar, Depok, Dili, Dompu, Donggala, Dumai, Ende, Enggano, Enrekang, Fakfak, Garut, Gianyar, Gombong, Gorontalo, Gresik, Gunung Sitoli, Indramayu, Jakarta Barat, Jakarta Pusat, Jakarta Selatan, Jakarta Timur, Jakarta Utara, Jambi, Jayapura, Jember, Jeneponto, Jepara, Jombang, Kabanjahe, Kalabahi, Kalianda, Kandangan, Karanganyar, Karawang, Kasungan, Kayuagung, Kebumen, Kediri, Kefamenanu, Kendal, Kendari, Kertosono, Ketapang, Kisaran, Klaten, Kolaka, Kota Baru Pulau Laut, Kota Bumi, Kota Jantho, Kotamobagu, Kuala Kapuas, Kuala Kurun, Kuala Pembuang, Kuala Tungkal, Kudus, Kuningan, Kupang, Kutacane, Kutoarjo, Labuhan, Lahat, Lamongan, Langsa, Larantuka, Lawang, Lhoseumawe, Limboto, Lubuk Basung, Lubuk Linggau, Lubuk Pakam, Lubuk Sikaping, Lumajang, Luwuk, Madiun, Magelang, Magetan, Majalengka, Majene, Makale, Makassar, Malang, Mamuju, Manna, Manokwari, Marabahan, Maros, Martapura Kalsel, Sulsel, Masohi, Mataram, Maumere, Medan, Mempawah, Menado, Mentok, Merauke, Metro, Meulaboh, Mojokerto, Muara Bulian, Muara Bungo, Muara Enim, Muara Teweh, Muaro Sijunjung, Muntilan, Nabire, Negara, Nganjuk, Ngawi, Nunukan, Pacitan, Padang, Padang Panjang, Padang Sidempuan, Pagaralam, Painan, Palangkaraya, Palembang, Palopo, Palu, Pamekasan, Pandeglang, Pangka_, Pangkajene Sidenreng, Pangkalan Bun, Pangkalpinang, Panyabungan, Par_, Parepare, Pariaman, Pasuruan, Pati, Payakumbuh, Pekalongan, Pekan Baru, Pemalang, Pematangsiantar, Pendopo, Pinrang, Pleihari, Polewali, Pondok Gede, Ponorogo, Pontianak, Poso, Prabumulih, Praya, Probolinggo, Purbalingga, Purukcahu, Purwakarta, Purwodadigrobogan, Purwokerto, Purworejo, Putussibau, Raha, Rangkasbitung, Rantau, Rantauprapat, Rantepao, Rembang, Rengat, Ruteng, Sabang, Salatiga, Samarinda, Kalbar, Sampang, Sampit, Sanggau, Sawahlunto, Sekayu, Selong, Semarang, Sengkang, Serang, Serui, Sibolga, Sidikalang, Sidoarjo, Sigli, Singaparna, Singaraja, Singkawang, Sinjai, Sintang, Situbondo, Slawi, Sleman, Soasiu, Soe, Solo, Solok, Soreang, Sorong, Sragen, Stabat, Subang, Sukabumi, Sukoharjo, Sumbawa Besar, Sumedang, Sumenep, Sungai Liat, Sungai Penuh, Sungguminasa, Surabaya, Surakarta, Tabanan, Tahuna, Takalar, Takengon, Tamiang Layang, Tanah Grogot, Tangerang, Tanjung Balai, Tanjung Enim, Tanjung Pandan, Tanjung Pinang, Tanjung Redep, Tanjung Selor, Tapak Tuan, Tarakan, Tarutung, Tasikmalaya, Tebing Tinggi, Tegal, Temanggung, Tembilahan, Tenggarong, Ternate, Tolitoli, Tondano, Trenggalek, Tual, Tuban, Tulung Agung, Ujung Berung, Ungaran, Waikabubak, Waingapu, Wamena, Watampone, Watansoppeng, Wates, Wonogiri, Wonosari, Wonosobo, Yogyakarta'
+			url = f'https://api.haipbis.xyz/jadwalsholat?daerah={daer}'
+			jadwal = get(url).json()
+			return {
+				'Imsyak': jadwal['Imsyak'],
+				'Subuh': jadwal['Subuh'],
+				'Dhuha': jadwal['Dhuha'],
+				'Dzuhur': jadwal['Dzuhur'],
+				'Ashar': jadwal['Ashar'],
+				'Maghrib': jadwal['Maghrib'],
+				'Isya': jadwal['Isya']
+			}
+		except:
+			return {
+				'status': False,
+				'error': '[❗] Daerah yang tersedia hanya : %s' % daerah
+			}
+	else:
+		return {
+			'status': False,
+			'msg': '[!] Masukkan parameter daerah'
+		}
 
 @app.route('/api/waifu', methods=['GET','POST'])
 def waifu():
@@ -354,7 +672,6 @@ def waifu():
 	if result['gender'] == 'female':
 		return {
 			'status': 200,
-			'restapi' : 'ferdiz-afk',
 			'name': result['name'],
 			'desc': desc,
 			'image': result['image'],
@@ -369,86 +686,52 @@ def waifu():
 			'source': result['url']
 		}
 
+@app.route('/api/infogempa', methods=['GET','POST'])
+def infogempa():
+	be = bs(get('https://www.bmkg.go.id/').text, 'html.parser').find('div', class_="col-md-4 md-margin-bottom-10")
+	em = be.findAll('li')
+	img = be.find('a')['href']
+	return {
+		'status': 200,
+		'map': img,
+		'waktu': em[0].text,
+		'magnitude': em[1].text,
+		'kedalaman': em[2].text,
+		'koordinat': em[3].text,
+		'lokasi': em[4].text,
+		'potensi': em[5].text
+	}
 
+@app.route('/api/randomquotes', methods=['GET','POST'])
+def quotes():
+	quotes_file = json.loads(open('quotes.json').read())
+	result = random.choice(quotes_file)
+	print(result)
+	return {
+		'status': 200,
+		'author': result['author'],
+		'quotes': result['quotes']
+	}
 
+@app.route('/api/quotesnime/random', methods=['GET','POST'])
+def quotesnimerandom():
+	quotesnime = get('https://animechanapi.xyz/api/quotes/random').json()['data'][0]
+	print(quotesnime)
+	return {
+		'status': 200,
+		'data': {
+			'quote': quotesnime['quote'],
+			'character': quotesnime['character'],
+			'anime': quotesnime['anime']
+		}
+	}
 @app.route('/api', methods=['GET','POST'])
 def api():
 	return render_template('api.html')
 
-@app.route('/profile', methods=['GET','POST'])
-def profile():
-	return render_template('profile.html')
-
 @app.route('/', methods=['GET','POST'])
 def index():
 	return render_template('index.html')
-
-HTTP_STATUS_CODES = {
-    100: "Continue",
-    101: "Switching Protocols",
-    102: "Processing",
-    103: "Early Hints",  # see RFC 8297
-    200: "OK",
-    201: "Created",
-    202: "Accepted",
-    203: "Non Authoritative Information",
-    204: "No Content",
-    205: "Reset Content",
-    206: "Partial Content",
-    207: "Multi Status",
-    208: "Already Reported",  # see RFC 5842
-    226: "IM Used",  # see RFC 3229
-    300: "Multiple Choices",
-    301: "Moved Permanently",
-    302: "Found",
-    303: "See Other",
-    304: "Not Modified",
-    305: "Use Proxy",
-    306: "Switch Proxy",  # unused
-    307: "Temporary Redirect",
-    308: "Permanent Redirect",
-    400: "Bad Request",
-    401: "Unauthorized",
-    402: "Payment Required",  # unused
-    403: "Forbidden",
-    404: "Not Found",
-    405: "Method Not Allowed",
-    406: "Not Acceptable",
-    407: "Proxy Authentication Required",
-    408: "Request Timeout",
-    409: "Conflict",
-    410: "Gone",
-    411: "Length Required",
-    412: "Precondition Failed",
-    413: "Request Entity Too Large",
-    414: "Request URI Too Long",
-    415: "Unsupported Media Type",
-    416: "Requested Range Not Satisfiable",
-    417: "Expectation Failed",
-    418: "I'm a teapot",  # see RFC 2324
-    421: "Misdirected Request",  # see RFC 7540
-    422: "Unprocessable Entity",
-    423: "Locked",
-    424: "Failed Dependency",
-    425: "Too Early",  # see RFC 8470
-    426: "Upgrade Required",
-    428: "Precondition Required",  # see RFC 6585
-    429: "Too Many Requests",
-    431: "Request Header Fields Too Large",
-    449: "Retry With",  # proprietary MS extension
-    451: "Unavailable For Legal Reasons",
-    500: "Internal Server Error",
-    501: "Not Implemented",
-    502: "Bad Gateway",
-    503: "Service Unavailable",
-    504: "Gateway Timeout",
-    505: "HTTP Version Not Supported",
-    506: "Variant Also Negotiates",  # see RFC 2295
-    507: "Insufficient Storage",
-    508: "Loop Detected",  # see RFC 5842
-    510: "Not Extended",
-    511: "Network Authentication Failed",  # see RFC 6585
-}
 
 @app.errorhandler(404)
 def error(e):
