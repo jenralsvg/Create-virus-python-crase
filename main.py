@@ -725,48 +725,6 @@ def quotesnimerandom():
 			'anime': quotesnime['anime']
 		}
 	}
-
-# SOSMED API #
-@app.route('/dok/epbe', methods=['GET','POST'])
-def dokepbe():
-	return render_template('epbe.html')
-
-@app.route('/dok/ig', methods=['GET','POST'])
-def dokig():
-	return render_template('ig.html')
-
-@app.route('/dok/yta', methods=['GET','POST'])
-def dokyta():
-	return render_template('yta.html')
-
-@app.route('/dok/ytv', methods=['GET','POST'])
-def dokytv():
-	return render_template('ytv.html')
-
-@app.route('/dok/twit', methods=['GET','POST'])
-def doktwit():
-	return render_template('twit.html')	
-
-@app.route('/dok/stalk', methods=['GET','POST'])
-def dokstalk():
-	return render_template('stalk.html')
-
-@app.route('/dok/twstalk', methods=['GET','POST'])
-def dokstalk():
-	return render_template('twstalk.html')
-
-# EDUCATIONAL API #
-
-@app.route('/dok/wiki', methods=['GET','POST'])
-def dokwiki():
-	return render_template('wiki.html')
-
-
-
-@app.route('/dok/cuaca', methods=['GET','POST'])
-def dokcuaca():
-	return render_template('cuaca.html')
-
 @app.route('/api', methods=['GET','POST'])
 def api():
 	return render_template('api.html')
