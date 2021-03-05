@@ -701,25 +701,6 @@ def infogempa():
 		'lokasi': em[4].text,
 		'potensi': em[5].text
 	}
-@app.route('/api/nulisbuku', methods=['GET','POST'])
-def nulis():
-	if request.args.get('kata'):
-		try:
-			tak = request.args.get('kata')
-			url = f'https://bot-waferdi.herokuapp.com/nulis?text={tak}'
-			kata = get(url).json()
-#			hasil = kata['images']
-			return {'status': 200,'restapi' : 'ferdiz-afk','result': kata['results']	}
-		except:
-			return {
-				'status': False,
-				'error': '[❗] eror'
-			}
-	else:
-		return {
-			'status': False,
-			'msg': '[!] Masukkan parameter kata'
-		}
 	
 @app.route('/api/randomquotes', methods=['GET','POST'])
 def quotes():
